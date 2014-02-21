@@ -1,0 +1,103 @@
+--- RSound-1.1/src/Makefile.orig	2011-03-12 21:12:53.000000000 +0100
++++ RSound-1.1/src/Makefile	2014-02-18 20:29:09.133326981 +0100
+@@ -17,7 +17,7 @@
+ TARGET_LIB_OBJ = librsound/librsound.o librsound/buffer.o
+ TARGET_LIB_OBJ_STATIC = librsound/librsound.a
+ 
+-PKGCONF_PATH = $(PREFIX)/lib/pkgconfig/rsound.pc
++PKGCONF_PATH = $(LIBDIR)/pkgconfig/rsound.pc
+ 
+ TARGET_SERVER_LIBS = -lpthread
+ TARGET_LIB_LIBS = -lpthread
+@@ -107,40 +107,40 @@
+ 
+ $(TARGET_CLIENT): $(TARGET_CLIENT_OBJ)
+ 	@echo "LD $@"
+-	@$(CC) $(CFLAGS) -o $(TARGET_CLIENT) $(TARGET_CLIENT_OBJ) $(TARGET_LIB_LIBS)
++	$(CC) $(CFLAGS) -o $(TARGET_CLIENT) $(TARGET_CLIENT_OBJ) $(TARGET_LIB_LIBS)
+ 
+ 
+ $(TARGET_LIB): $(TARGET_LIB_OBJ) $(TARGET_LIB_OBJ_STATIC)
+ 	@echo "LD $@"
+ ifeq ($(PLATFORM),OSX)
+-	@$(CC) -shared -dynamiclib -o $(TARGET_LIB) $(CFLAGS) $(TARGET_LIB_OBJ) $(TARGET_LIB_LIBS) -install_name $(PREFIX)/lib/librsound.dylib
++	$(CC) -shared -dynamiclib -o $(TARGET_LIB) $(CFLAGS) $(TARGET_LIB_OBJ) $(TARGET_LIB_LIBS) -install_name $(PREFIX)/lib/librsound.dylib
+ else
+-	@$(CC) -shared -Wl,-soname,librsound.so.3 -o $(TARGET_LIB) $(CFLAGS) $(TARGET_LIB_OBJ) $(TARGET_LIB_LIBS) -fPIC
+-	@ln -sf librsound.so.3.0.0 librsound/librsound.so.3
+-	@ln -sf librsound.so.3.0.0 librsound/librsound.so
++	$(CC) -shared -Wl,-soname,librsound.so.3 -o $(TARGET_LIB) $(CFLAGS) $(TARGET_LIB_OBJ) $(TARGET_LIB_LIBS) -fPIC
++	ln -sf librsound.so.3.0.0 librsound/librsound.so.3
++	ln -sf librsound.so.3.0.0 librsound/librsound.so
+ endif
+ 
+ $(TARGET_SERVER): $(TARGET_SERVER_OBJ)
+ 	@echo "LD $@"
+-	@$(CC) -o $(TARGET_SERVER) $(TARGET_SERVER_OBJ) $(TARGET_SERVER_LIBS) $(CFLAGS)
++	$(CC) -o $(TARGET_SERVER) $(TARGET_SERVER_OBJ) $(TARGET_SERVER_LIBS) $(CFLAGS)
+ 
+ 
+ librsound/librsound.o: librsound/librsound.c config.h
+ 	@echo "CC $<"
+-	@$(CC) $(CFLAGS) -fPIC -c -o $@ $<
++	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+ 
+ librsound/buffer.o: librsound/buffer.c
+ 	@echo "CC $<"
+-	@$(CC) $(CFLAGS) -fPIC -c -o $@ $<
++	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+ 
+ $(TARGET_LIB_OBJ_STATIC): $(TARGET_LIB_OBJ)
+ 	@echo "AR $@"
+-	@$(AR) rcs $(TARGET_LIB_OBJ_STATIC) $(TARGET_LIB_OBJ) >/dev/null 2>/dev/null
++	$(AR) rcs $(TARGET_LIB_OBJ_STATIC) $(TARGET_LIB_OBJ) >/dev/null 2>/dev/null
+ 
+ 	
+ %.o: %.c
+ 	@echo "CC $<"
+-	@$(CC) $(CFLAGS) -c -o $@ $<
++	$(CC) $(CFLAGS) -c -o $@ $<
+ 
+ rsound-common.o: config.h
+ 
+@@ -164,14 +164,14 @@
+ 
+ 
+ install-lib: $(TARGET_LIB) $(TARGET_LIB_OBJ_STATIC) install-pkgconf
+-	mkdir -p $(DESTDIR)$(PREFIX)/{lib/pkgconfig,include,share/man/man1}
+-	install -m755 $(TARGET_LIB) $(DESTDIR)$(PREFIX)/lib
++	mkdir -p $(DESTDIR){$(LIBDIR)/pkgconfig,$(PREFIX)/{include,share/man/man1}}
++	install -m755 $(TARGET_LIB) $(DESTDIR)$(LIBDIR)
+ ifneq ($(PLATFORM),OSX)
+-	cp -P librsound/librsound.so librsound/librsound.so.3 $(DESTDIR)$(PREFIX)/lib
++	cp -P librsound/librsound.so librsound/librsound.so.3 $(DESTDIR)$(LIBDIR)
+ endif
+-	install -m644 $(TARGET_LIB_OBJ_STATIC) $(DESTDIR)$(PREFIX)/lib
++	install -m644 $(TARGET_LIB_OBJ_STATIC) $(DESTDIR)$(LIBDIR)
+ 	install -m644 librsound/rsound.h $(DESTDIR)$(PREFIX)/include
+-	install -m644 rsound.pc $(DESTDIR)$(PREFIX)/lib/pkgconfig
++	install -m644 rsound.pc $(DESTDIR)$(LIBDIR)/pkgconfig
+ 	install -m644 ../doc/rsd.1 $(DESTDIR)$(PREFIX)/share/man/man1
+ 	install -m644 ../doc/rsdplay.1 $(DESTDIR)$(PREFIX)/share/man/man1
+ 
+@@ -186,7 +186,7 @@
+ install-pkgconf:
+ 	@echo "prefix=$(PREFIX)" > rsound.pc
+ 	@echo "exec_prefix=\$${prefix}" >> rsound.pc
+-	@echo "libdir=\$${prefix}/lib" >> rsound.pc
++	@echo "libdir=$(LIBDIR)" >> rsound.pc
+ 	@echo "includedir=\$${prefix}/include" >> rsound.pc
+ 	@echo "" >> rsound.pc
+ 	@echo "Name: RSound" >> rsound.pc
+@@ -199,9 +199,9 @@
+ uninstall:
+ 	rm -rf $(PREFIX)/bin/rsd
+ 	rm -rf $(PREFIX)/bin/rsdplay
+-	rm -rf $(PREFIX)/lib/librsound.*
++	rm -rf $(LIBDIR)/librsound.*
+ 	rm -rf $(PREFIX)/include/rsound.h
+-	rm -rf $(PREFIX)/lib/pkgconfig/rsound.pc
++	rm -rf $(LIBDIR)/pkgconfig/rsound.pc
+ 	rm -rf $(PREFIX)/share/man/man1/rsd.1
+ 	rm -rf $(PREFIX)/share/man/man1/rsdplay.1
+ 
