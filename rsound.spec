@@ -2,7 +2,7 @@
 #
 # Conditional build:
 %bcond_without	alsa		# ALSA support in rsd
-%bcond_without	ao		# libao support in rsd
+%bcond_without	libao		# libao support in rsd
 %bcond_without	jack		# JACK support in rsd
 %bcond_with	muroar		# muRoar support in rsd
 %bcond_without	openal		# OpenAL support in rsd
@@ -25,7 +25,7 @@ URL:		http://themaister.net/rsound.html
 %{?with_openal:BuildRequires:	OpenAL-devel}
 %{?with_alsa:BuildRequires:	alsa-lib-devel >= 0.9}
 %{?with_jack:BuildRequires:	jack-audio-connection-kit-devel}
-%{?with_ao:BuildRequires:	libao-devel}
+%{?with_libao:BuildRequires:	libao-devel}
 %{?with_roar:BuildRequires:	libroar-devel}
 BuildRequires:	libsamplerate-devel
 %{?with_muroar:BuildRequires:	muroar-devel}
@@ -109,7 +109,7 @@ CFLAGS="%{rpmcflags} %{rpmcppflags}" \
 	--prefix=%{_prefix} \
 	%{!?with_alsa:--disable-alsa} \
 	%{!?with_jack:--disable-jack} \
-	%{!?with_ao:--disable-libao} \
+	%{!?with_libao:--disable-libao} \
 	%{!?with_muroar:--disable-muroar} \
 	%{!?with_openal:--disable-openal} \
 	%{!?with_oss:--disable-oss} \
