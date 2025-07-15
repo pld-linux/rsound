@@ -99,7 +99,7 @@ Wiązanie Pythona do biblioteki RSound.
 
 %prep
 %setup -q -n RSound-%{version}
-%patch0 -p1
+%patch -P0 -p1
 
 %build
 # not autoconf configure
